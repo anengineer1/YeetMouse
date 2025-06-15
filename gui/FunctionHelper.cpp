@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include "DriverHelper.h"
 #include "External/ImGui/imgui_internal.h"
 
 CachedFunction::CachedFunction(float xStride, Parameters *params)
@@ -48,6 +49,13 @@ float CachedFunction::EvalFuncAt(float x) {
         {
             val = (params->accel - 1) / (1 + exp(params->midpoint - x)) + 1;
             break;
+        }
+    case AccelMode_Natural: {
+
+      float auxiliar_accel = params->accel / params->limit;
+      float n_offset_x = params->offset - x;
+      float decay = exp(auxiliar_accel * n_offset_x);
+      val = params->limit * (1.0 - (params->offset - decay * offset_x / x)) + 1.0;
         }
         case AccelMode_Jump: // Jump
         {
@@ -151,6 +159,10 @@ void CachedFunction::PreCacheFunc() {
             break;
         }
         case AccelMode_Motivity:
+        {
+            break;
+        }
+        case AccelMode_Natural:
         {
             break;
         }

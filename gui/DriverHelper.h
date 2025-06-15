@@ -45,9 +45,10 @@ enum AccelMode {
     AccelMode_Power = 2,
     AccelMode_Classic = 3,
     AccelMode_Motivity = 4,
-    AccelMode_Jump = 5,
-    AccelMode_Lut = 6,
-    AccelMode_CustomCurve = 7,
+    AccelMode_Natural = 5,
+    AccelMode_Jump = 6,
+    AccelMode_Lut = 7,
+    AccelMode_CustomCurve = 8,
     AccelMode_Count,
 };
 
@@ -63,6 +64,8 @@ inline std::string AccelMode2String(AccelMode mode) {
             return "Classic";
         case AccelMode_Motivity:
             return "Motivity";
+        case AccelMode_Natural:
+            return "Natural";
         case AccelMode_Jump:
             return "Jump";
         case AccelMode_Lut:
@@ -83,7 +86,9 @@ inline std::string AccelMode2String_CAPS(AccelMode mode) {
         case AccelMode_Classic:
             return "CLASSIC";
         case AccelMode_Motivity:
-            return "MOTIVITY";
+          return "MOTIVITY";
+        case AccelMode_Natural:
+          return "NATURAL";
         case AccelMode_Jump:
             return "JUMP";
         case AccelMode_Lut:
@@ -108,6 +113,8 @@ inline AccelMode AccelMode_From_String(std::string mode_text) {
         return AccelMode_Classic;
     else if (mode_text == "motivity")
         return AccelMode_Motivity;
+    else if (mode_text == "natural")
+        return AccelMode_Natural;
     else if (mode_text == "jump")
         return AccelMode_Jump;
     else
@@ -124,6 +131,7 @@ struct Parameters {
     float exponent = 0.4f;
     float midpoint = 5.0f;
     float preScale = 1.0f;
+    float limit = 2.0f; // used in the Natural curve, it is like outCap but it is an asymptote instead
     //float scrollAccel = 1.0f;
     AccelMode accelMode = AccelMode_Current;
     bool useSmoothing = true; // true/false

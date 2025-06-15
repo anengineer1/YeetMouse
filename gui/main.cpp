@@ -1,5 +1,6 @@
 #include <array>
 #include <csignal>
+#include "External/ImGui/imgui.h"
 #include "gui.h"
 #include "External/ImGui/implot.h"
 #include "DriverHelper.h"
@@ -25,7 +26,7 @@
 
 AccelMode selected_mode = AccelMode_Linear;
 
-const char *AccelModes[] = {"Current", "Linear", "Power", "Classic", "Motivity", "Jump", "Look Up Table", "Custom Curve"};
+const char *AccelModes[] = {"Current", "Linear", "Power", "Classic", "Motivity", "Natural", "Jump", "Look Up Table", "Custom Curve"};
 #define NUM_MODES AccelMode_Count //(sizeof(AccelModes) / sizeof(char *))
 
 Parameters params[NUM_MODES]; // Driver parameters for each mode
@@ -246,6 +247,25 @@ int OnGui() {
 #endif
                 break;
             }
+            case AccelMode_Natural:
+            {
+#ifdef USE_INPUT_DRAG
+                change |= ImGui::DragFloat("##Accel_Param",
+                                           &params[selected_mode].accel, 0.001, 0,001
+                                             10, "Acceleration %0.3f");
+                change |= ImGui::DragFloat("##Limit_Param",
+                                             &params[selected_mode].limit, 0,001
+                                             0.001, 20, "Limit %0.3f");
+#else
+                change |= ImGui::SliderFloat("##Accel_Param",
+                                             &params[selected_mode].accel, 0.001,
+                                             10, "Acceleration %0.3f");
+                change |= ImGui::SliderFloat("##Limit_Param",
+                                             &params[selected_mode].limit,
+                                             0.001, 20, "Limit %0.3f");
+#endif // USE_INPUT_DRAG          
+	        break;
+	    }
             case AccelMode_Jump: // Jump
             {
 #ifdef USE_INPUT_DRAG
