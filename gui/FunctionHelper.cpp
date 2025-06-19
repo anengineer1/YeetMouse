@@ -3,6 +3,8 @@
 #include "FunctionHelper.h"
 
 #include <array>
+#include <cstdlib>
+#include <iostream>
 
 #include "DriverHelper.h"
 #include "External/ImGui/imgui_internal.h"
@@ -51,11 +53,30 @@ float CachedFunction::EvalFuncAt(float x) {
             break;
         }
     case AccelMode_Natural: {
-
-      float auxiliar_accel = params->accel / params->limit;
-      float n_offset_x = params->offset - x;
+      if (x <= params->offset) {
+        val = 1;
+      } else {
+      float limit = params->limit - 1.0;
+      float auxiliar_accel = params->accel / fabs(limit);
+      float offset = params->offset;
+      float n_offset_x = offset - x;
       float decay = exp(auxiliar_accel * n_offset_x);
-      val = params->limit * (1.0 - (params->offset - decay * offset_x / x)) + 1.0;
+
+        if (params->useSmoothing) {
+          float aux_constant = -limit / auxiliar_accel;
+          float numerator =
+            limit * ((decay / auxiliar_accel) - n_offset_x) + aux_constant;
+          val = (numerator / x) + 1.0;
+        } else {
+
+
+
+
+          val = limit * (1.0 - (offset - decay * n_offset_x) / x) + 1.0;
+
+        }
+      }
+      break;
         }
         case AccelMode_Jump: // Jump
         {
@@ -212,7 +233,10 @@ bool CachedFunction::ValidateSettings() {
     isValid = true;
 
     for (int i = 0; i < PLOT_POINTS; i++) {
-        if (isnan(values[i]) || isnan(values_y[i]) || isinf(values[i]) || isinf(values_y[i]) || values[i] > 1e5 || values_y[i] > 1e5) {
+      if (isnan(values[i]) || isnan(values_y[i]) || isinf(values[i]) ||
+          isinf(values_y[i]) || values[i] > 1e5 || values_y[i] > 1e5) {
+        std::cout << "here" << "\n";
+
             isValid = false;
             return isValid;
         }
@@ -244,6 +268,10 @@ bool CachedFunction::ValidateSettings() {
         if (isnan(power_constant) || isinf(power_constant) || isnan(offset_x) || isinf(offset_x)) {
             isValid = false;
         }
+    }
+
+    if (params->accelMode == AccelMode_Natural) {
+      isValid = true;
     }
 
     if (params->accelMode == AccelMode_Jump) {

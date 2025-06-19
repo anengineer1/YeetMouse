@@ -263,7 +263,11 @@ int OnGui() {
                 change |= ImGui::SliderFloat("##Limit_Param",
                                              &params[selected_mode].limit,
                                              0.001, 20, "Limit %0.3f");
-#endif // USE_INPUT_DRAG          
+#endif // USE_INPUT_DRAG
+                change |= ImGui::Checkbox("##Smoothing_Param",
+                                          &params[selected_mode].useSmoothing);
+                ImGui::SameLine();
+                ImGui::Text("Use Smoothing");
 	        break;
 	    }
             case AccelMode_Jump: // Jump
@@ -302,6 +306,7 @@ int OnGui() {
                         std::size(params[selected_mode].LUT_data_x));
                 }
                 break;
+            }
             case AccelMode_CustomCurve: {
                 if (ImGui::Button("Smooth Curve", {-1, 0})) {
                     params[selected_mode].customCurve.SmoothBezier();
@@ -393,7 +398,7 @@ int OnGui() {
 
                 break;
             }
-            }
+
             default: {
                 break;
             }
