@@ -42,6 +42,29 @@ float CachedFunction::EvalFuncAt(float x) {
             val = (params->accel - 1) / (1 + std::exp(params->midpoint - x)) + 1;
             break;
         }
+        case AccelMode_Natural:
+        {
+	    if (x <= params->offset) {
+		val = 1;
+	    } else {
+		float limit = params->exponent - 1.0;
+                float auxiliar_accel = params->accel / std::fabs(limit);
+                float offset = params->offset;
+                float n_offset_x = offset - x;
+                float decay = std::exp(auxiliar_accel * n_offset_x);
+
+		if (params->useSmoothing) {
+                    float auxiliar_constant = -limit / auxiliar_accel;
+                    float numerator =
+                        limit * ((decay / auxiliar_accel) - n_offset_x) +
+                        auxiliar_constant;
+                    val = (numerator / x) + 1.0;
+                } else {
+                    val = limit * (1.0 - (offset - decay * n_offset_x) / x) + 1.0;
+		}
+	    }
+	    break;
+        }
         case AccelMode_Jump: // Jump
         {
             // Might cause issues with high exponent's argument values
