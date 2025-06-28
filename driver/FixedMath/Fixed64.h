@@ -281,19 +281,86 @@ static FP_INT FP64_Nlz(FP_ULONG x) {
 static FP_LONG Div128_64(FP_LONG u1, FP_LONG u0, FP_LONG v) {
     FP_LONG result;
 #if defined (__ppc64le__)
-    FP_LONG result_2;
-    __asm__ ( // left part
-         //"cqto\n\t"
-        "divde %0, %1, %2"
-        : "=r"(result)
-        : "r"(u1), "r"(v)
-    );
-    __asm__( // right part
-      //"cqto\n\t"
-      "divd %0, %1, %2"
-      : "=r"(result_2)
-      : "r"(u0), "r"(v));
-    return result + result_2;
+    FP_LONG q1;
+    FP_LONG q2;
+    FP_LONG minus_r1;
+    FP_LONG r2;
+    FP_LONG q2dv;
+    FP_LONG total_r;
+    __asm__(
+        // Algorithm step 1: q1 <- divweu Dh, Dv
+        // PowerPC 'divweu %[dest], %[num_high_part], %[divisor]'
+        "divde %[q1], %[Dh], %[Dv]\n\t"
+
+        // Algorithm step 3: q2 <- divwu Dl, Dv
+        // PowerPC 'divwu %[dest], %[num_low_part], %[divisor]'
+        "divdu %[q2], %[Dl], %[Dv]\n\t"
+
+        // For Algorithm step 2: r1 <- -(q1 × Dv)
+        // This operation returns -r1 as this is just the mult
+        // without changing the sign
+        "mulld %[minus_r1], %[q1], %[Dv]\n\t"
+
+        // For Algorithm step 4: r2 <- Dl - (q2 × Dv)
+        // First, calculate q2_prod_temp = q2 * Dv
+        "mulld %[q2dv], %[q2], %[Dv]\n\t" // q2 * Dv
+
+        // Then, r2 = Dl - q2dv
+        // so this is step 4
+        "subf %[r2], %[q2dv], %[Dl]\n\t"
+
+        // Algorithm step 5: Q <- q1 + q2
+        "add %[result], %[q1], %[q2]\n\t"
+
+        // Algorithm step 6: R <- r1 + r2
+        // As per the provided assembly, R is calculated as r2 - (q1 * Dv).
+        // r1 is effectively low32bits(-(q1*Dv)). So R = r2 +
+        // low32bits(-(q1*Dv)). This is equivalent to r2 - (q1*Dv) using two's
+        // complement arithmetic for the negation and sum.
+        "subf %[total_r], %[minus_r1], %[r2]\n\t"
+
+        // Algorithm step 7: if (R < r2) | (R >= Dv) then adjust Q and R.
+        // PowerPC 'cmplw cr_field, %[val1], %[val2]' (compares val1 and val2,
+        // sets cr_field)
+        "cmpld cr0, %[total_r], %[r2]\n\t"
+        // PowerPC 'blt target_cr_field, label' (branch if cr_field indicates
+        // less-than)
+        "blt cr0, 0f\n\t" // Branch to adjustment if R < r2 (label 0, forward)
+
+        "cmpld cr0, %[total_r], %[Dv]\n\t"
+        // If R < Dv, the condition (R >= Dv) is false. So, branch to skip
+        // adjustment. If R >= Dv, it means R must be adjusted, so fall through
+        // to adjustment code.
+        "blt cr0, 1f\n\t" // Branch to skip adjustment if R < Dv (label 1,
+                          // forward)
+
+        "0:\n\t" // Adjustment label
+                 // Q <- Q + 1
+                 // PowerPC 'addi %[dest_src], %[src], immediate_val'
+        "addi %[result], %[result], 1\n\t"
+        // R <- R - Dv
+        // "subf %[R_o], %[Dv_i], %[R_o]\n\t" // Computes: R_o = R_o - Dv_i
+        // we don't use this part as we only need Q
+
+    "1:\n\t" // Skip adjustment label / end of conditional adjustment
+
+        // === Operand Constraints ===
+        // Output Operands:
+        // "+r": A register that is both read and written (read-write).
+        // "=&r": A write-only register that is written before all inputs are read.
+        : [result] "+r"(result), [total_r] "+r"(total_r),
+          [q1] "=&r"(q1), [q2] "=&r"(q2),
+          [minus_r1] "=&r"(minus_r1), [r2] "=&r"(r2),
+          [q2dv] "=&r"(q2dv)
+        // Input Operands:
+        // [Dh_i], [Dl_i], [Dv_i] are the inputs to the division.
+        : [Dh] "r"(u1), [Dl] "r"(u0), [Dv] "r"(v)
+        // Clobbered Registers:
+        // cr0 (Condition Register field 0) is modified by 'cmplw' and used by 'blt'.
+        : "cr0"        
+     );
+
+    return result;
 #else
     uint64_t remainder;
     __asm__ (
