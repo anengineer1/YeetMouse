@@ -251,7 +251,7 @@ int accelerate(int *x, int *y, int *wheel)
                 speed = accel_motivity(speed);
                 break;
             case AccelMode_Natural:
-                speed = accel_natural(speed, g_Offset);
+                speed = accel_natural(speed);
                 break;
             case AccelMode_Jump:
                 speed = accel_jump(speed);

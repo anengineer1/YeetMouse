@@ -44,12 +44,12 @@ float CachedFunction::EvalFuncAt(float x) {
         }
         case AccelMode_Natural:
         {
-	    if (x <= params->offset) {
+	    if (x <= params->midpoint) {
 		val = 1;
 	    } else {
 		float limit = params->exponent - 1.0;
                 float auxiliar_accel = params->accel / std::fabs(limit);
-                float offset = params->offset;
+                float offset = params->midpoint;
                 float n_offset_x = offset - x;
                 float decay = std::exp(auxiliar_accel * n_offset_x);
 
@@ -167,6 +167,10 @@ void CachedFunction::PreCacheConstants() {
         {
             break;
         }
+        case AccelMode_Natural:
+        {
+	break;
+	}
         case AccelMode_Jump:
         {
             //printf("exp = %.2f, mid = %.2f\n", params->exponent, params->midpoint);
@@ -258,6 +262,12 @@ bool CachedFunction::ValidateSettings() {
         if (std::isnan(smoothness) || std::isinf(smoothness) || std::isnan(C0) || std::isinf(C0)) {
             isValid = false;
         }
+    }
+
+    if (params->accelMode == AccelMode_Natural) {
+	if (params->midpoint <= 0) {
+	    isValid = false;
+	}
     }
 
     return isValid;

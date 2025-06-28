@@ -251,11 +251,15 @@ int OnGui() {
 #ifdef USE_INPUT_DRAG
                         change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.001, 0.001, 5, "Acceleration %0.3f");
                         change |= ImGui::DragFloat("##Exp_Param", &params[selected_mode].exponent, 0.001, 0.001, 8, "Limit %0.3f");
+                        change |= ImGui::DragFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0, 0.1, 50, "Start %0.2f");
 #else
                 change |= ImGui::SliderFloat("##Accel_Param", &params[selected_mode].accel, 0.001, 5,
                                              "Acceleration %0.3f");
                 change |= ImGui::SliderFloat("##Exp_Param", &params[selected_mode].exponent, 0.001, 8,
                                              "Limit %0.3f");
+		change |= ImGui::SliderFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0, 50,
+                                             "Midpoint %0.2f");
+
 #endif
                 change |= ImGui::Checkbox("##Smoothing_Param", &params[selected_mode].useSmoothing);
                 ImGui::SameLine();
@@ -823,10 +827,10 @@ int OnGui() {
 
         ImGui::SameLine();
 
-        // Disable Apply button for 1.1 second after clicking it (this is a driver "limitation")
+        // Disable Apply button for 1.1 second after clicking it th(is is a driver "limitation")
         ImGui::BeginDisabled(!has_privilege || !was_initialized ||
                              duration_cast<milliseconds>(steady_clock::now() - last_apply_clicked).count() < 1100 ||
-                             (selected_mode == 6 /* LUT */ && params[selected_mode].LUT_size == 0) ||
+                             (selected_mode == AccelMode_Lut /* LUT */ && params[selected_mode].LUT_size == 0) ||
                              !functions[selected_mode].isValid);
 
         if (ImGui::Button("Apply", {-1, -1})) {
@@ -886,6 +890,9 @@ void ResetParameters(void) {
 
         if (mode == AccelMode_Classic)
             params[mode].exponent = fmaxf(fminf(params[mode].exponent, 5), 2.1);
+
+        if (mode == AccelMode_Natural)
+            params[mode].exponent = fmaxf(fminf(params[mode].exponent, 1), 0.01);
 
         if (mode == AccelMode_Jump)
             params[mode].exponent = fmaxf(fminf(params[mode].exponent, 1), 0.01);

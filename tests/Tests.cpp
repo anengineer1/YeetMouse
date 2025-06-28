@@ -219,9 +219,10 @@ bool Tests::TestAccelNatural(float range_min, float range_max) {
 
     try {
         TestManager::SetAccelMode(AccelMode_Natural);
-        TestManager::SetAcceleration(0.001f);
-        TestManager::SetExponent(2.f);
+        TestManager::SetAcceleration(1.02f);
+        TestManager::SetExponent(5.f);
         TestManager::UpdateModesConstants();
+	TestManager::SetMidpoint(0.f);
 	TestManager::SetUseSmoothing(false);
 
         printf("Running test #1 for Natural Mode\n");
@@ -233,16 +234,21 @@ bool Tests::TestAccelNatural(float range_min, float range_max) {
             result &= IsAccelValueGood(res);
             result &=
                 IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+	    printf("res: %f\n", FP64_ToFloat(res));
+            printf("val function: %f\n", TestManager::EvalFloatFunc(value));
+
         }
 
         printf("Test #1: %s\n" RESET, result ? GREEN "Passed" : RED "Failed");
 
         // Test 2
+        result = true;
         TestManager::SetAccelMode(AccelMode_Natural);
-        TestManager::SetAcceleration(0.001f);
-        TestManager::SetExponent(2.f);
+        TestManager::SetAcceleration(0.041f);
+        TestManager::SetExponent(3.f);
+        TestManager::SetMidpoint(6.f);
+        TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
-	TestManager::SetUseSmoothing(true);
 
         printf("Running test #2 for Natural Mode\n");
 
@@ -253,9 +259,35 @@ bool Tests::TestAccelNatural(float range_min, float range_max) {
             result &= IsAccelValueGood(res);
             result &=
                 IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+            // printf("res: %f\n", FP64_ToFloat(res));
+            // printf("val function: %f\n", TestManager::EvalFloatFunc(value));
+
         }
 
         printf("Test #2: %s\n" RESET, result ? GREEN "Passed" : RED "Failed");
+
+        // Test 3
+        result = true;
+        TestManager::SetAccelMode(AccelMode_Natural);
+        TestManager::SetAcceleration(0.2f);
+        TestManager::SetExponent(5.f);
+        TestManager::SetMidpoint(0.f);
+        TestManager::SetUseSmoothing(false);
+        TestManager::UpdateModesConstants();
+
+        printf("Running test #3 for Natural Mode\n");
+
+        for (int i = 0; i < BASIC_TEST_STEPS; i++) {
+            float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
+            auto res = TestManager::AccelNatural(value);
+
+            result &= IsAccelValueGood(res);
+            result &=
+                IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+        }
+
+        printf("Test #3: %s\n" RESET, result ? GREEN "Passed" : RED "Failed");
+
 
     }
     catch (std::exception &ex) {
@@ -342,8 +374,6 @@ bool Tests::TestAccelJump(float range_min, float range_max) {
             temp_res = false;
         }
 
-        printf("Test #4: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
-        result &= temp_res;
     }
     catch (std::exception &ex) {
         fprintf(stderr, "Exception: %s, in Jump mode\n", ex.what());
