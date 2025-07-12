@@ -186,7 +186,7 @@ let
           acceleration = mkOption {
             type = floatRange 0.001 5.0;
             default = 0.15;
-            description = "Natural acceleration multiplier";
+            description = "Natural decay rate";
           };
           midpoint = mkOption {
             type = floatRange 0 50.0;

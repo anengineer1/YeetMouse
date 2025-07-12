@@ -42,28 +42,27 @@ float CachedFunction::EvalFuncAt(float x) {
             val = (params->accel - 1) / (1 + std::exp(params->midpoint - x)) + 1;
             break;
         }
-        case AccelMode_Natural:
-        {
-	    if (x <= params->midpoint) {
-		val = 1;
-	    } else {
-		float limit = params->exponent - 1.0;
+        case AccelMode_Natural: {
+            if (x <= params->midpoint) {
+                val = 1;
+            } else {
+                float limit = params->exponent - 1.0;
                 float auxiliar_accel = params->accel / std::fabs(limit);
                 float offset = params->midpoint;
                 float n_offset_x = offset - x;
                 float decay = std::exp(auxiliar_accel * n_offset_x);
 
-		if (params->useSmoothing) {
+                if (params->useSmoothing) {
                     float auxiliar_constant = -limit / auxiliar_accel;
                     float numerator =
-                        limit * ((decay / auxiliar_accel) - n_offset_x) +
-                        auxiliar_constant;
+                            limit * ((decay / auxiliar_accel) - n_offset_x) +
+                            auxiliar_constant;
                     val = (numerator / x) + 1.0;
                 } else {
                     val = limit * (1.0 - (offset - decay * n_offset_x) / x) + 1.0;
-		}
-	    }
-	    break;
+                }
+            }
+            break;
         }
         case AccelMode_Jump: // Jump
         {
@@ -167,12 +166,10 @@ void CachedFunction::PreCacheConstants() {
         {
             break;
         }
-        case AccelMode_Natural:
-        {
-	break;
-	}
-        case AccelMode_Jump:
-        {
+        case AccelMode_Natural: {
+            break;
+        }
+        case AccelMode_Jump: {
             //printf("exp = %.2f, mid = %.2f\n", params->exponent, params->midpoint);
             smoothness = (2 * M_PI) / (params->exponent * params->midpoint);
             //printf("sm = %.2f\n", smoothness);
@@ -265,9 +262,9 @@ bool CachedFunction::ValidateSettings() {
     }
 
     if (params->accelMode == AccelMode_Natural) {
-	if (params->midpoint < 0) {
-	    isValid = false;
-	}
+        if (params->midpoint < 0) {
+            isValid = false;
+        }
     }
 
     return isValid;

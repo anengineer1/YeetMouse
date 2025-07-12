@@ -22,6 +22,10 @@ struct ModesConstants {
     FP_LONG offset_x;
     FP_LONG power_constant;
 
+    // Natural
+    FP_LONG auxiliar_accel;
+    FP_LONG auxiliar_constant;
+
     // Rotation
     FP_LONG sin_a, cos_a;
 

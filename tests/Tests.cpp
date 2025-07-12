@@ -7,8 +7,6 @@
 #include "driver/accel_modes.h"
 
 #include "../gui/FunctionHelper.h"
-#include "driver/config.h"
-#include "shared_definitions.h"
 
 //static CachedFunction functions[AccelMode_Count];
 
@@ -222,27 +220,27 @@ bool Tests::TestAccelNatural(float range_min, float range_max) {
         TestManager::SetAcceleration(1.02f);
         TestManager::SetExponent(5.f);
         TestManager::UpdateModesConstants();
-	TestManager::SetMidpoint(0.f);
-	TestManager::SetUseSmoothing(false);
+        TestManager::SetMidpoint(0.f);
+        TestManager::SetUseSmoothing(false);
 
         printf("Running test #1 for Natural Mode\n");
+        bool temp_res = true;
 
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelNatural(value);
 
-            result &= IsAccelValueGood(res);
-            result &=
-                IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
-	    printf("res: %f\n", FP64_ToFloat(res));
-            printf("val function: %f\n", TestManager::EvalFloatFunc(value));
-
+            temp_res &= IsAccelValueGood(res);
+            temp_res &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+            //printf("res: %f\n", FP64_ToFloat(res));
+            //printf("val function: %f\n", TestManager::EvalFloatFunc(value));
         }
 
-        printf("Test #1: %s\n" RESET, result ? GREEN "Passed" : RED "Failed");
+        printf("Test #1: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
+        result &= temp_res;
 
         // Test 2
-        result = true;
+        temp_res = true;
         TestManager::SetAccelMode(AccelMode_Natural);
         TestManager::SetAcceleration(0.041f);
         TestManager::SetExponent(3.f);
@@ -256,18 +254,17 @@ bool Tests::TestAccelNatural(float range_min, float range_max) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelNatural(value);
 
-            result &= IsAccelValueGood(res);
-            result &=
-                IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+            temp_res &= IsAccelValueGood(res);
+            temp_res &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
             // printf("res: %f\n", FP64_ToFloat(res));
             // printf("val function: %f\n", TestManager::EvalFloatFunc(value));
-
         }
 
-        printf("Test #2: %s\n" RESET, result ? GREEN "Passed" : RED "Failed");
+        printf("Test #2: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
+        result &= temp_res;
 
         // Test 3
-        result = true;
+        temp_res = true;
         TestManager::SetAccelMode(AccelMode_Natural);
         TestManager::SetAcceleration(0.2f);
         TestManager::SetExponent(5.f);
@@ -281,16 +278,52 @@ bool Tests::TestAccelNatural(float range_min, float range_max) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelNatural(value);
 
-            result &= IsAccelValueGood(res);
-            result &=
-                IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+            temp_res &= IsAccelValueGood(res);
+            temp_res &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
         }
 
-        printf("Test #3: %s\n" RESET, result ? GREEN "Passed" : RED "Failed");
+        printf("Test #3: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
+        result &= temp_res;
 
+        // Test 4
+        printf("Running test #4 for Natural Mode\n");
 
-    }
-    catch (std::exception &ex) {
+        temp_res = true;
+        TestManager::SetAccelMode(AccelMode_Natural);
+        TestManager::SetAcceleration(0.2f);
+        TestManager::SetExponent(1.f);
+        TestManager::SetMidpoint(0.5f);
+        TestManager::SetUseSmoothing(false);
+        TestManager::UpdateModesConstants();
+
+        if (TestManager::ValidateConstants()) { // Should be invalid!
+            fprintf(stderr, "Valid constants (should be invalid)\n");
+            temp_res = false;
+        }
+
+        printf("Test #4: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
+        result &= temp_res;
+
+        // Test 5
+        printf("Running test #5 for Natural Mode\n");
+
+        temp_res = true;
+        TestManager::SetAccelMode(AccelMode_Natural);
+        TestManager::SetAcceleration(0.f);
+        TestManager::SetExponent(2.5f);
+        TestManager::SetMidpoint(0.5f);
+        TestManager::SetUseSmoothing(false);
+        TestManager::UpdateModesConstants();
+
+        if (TestManager::ValidateConstants()) { // Should be invalid!
+            fprintf(stderr, "Valid constants (should be invalid)\n");
+            temp_res = false;
+        }
+
+        printf("Test #5: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
+        result &= temp_res;
+
+    } catch (std::exception &ex) {
         fprintf(stderr, "Exception: %s, in Natural mode\n", ex.what());
         result = false;
     }
@@ -374,6 +407,8 @@ bool Tests::TestAccelJump(float range_min, float range_max) {
             temp_res = false;
         }
 
+        printf("Test #4: %s\n" RESET, temp_res ? GREEN "Passed" : RED "Failed");
+        result &= temp_res;
     }
     catch (std::exception &ex) {
         fprintf(stderr, "Exception: %s, in Jump mode\n", ex.what());

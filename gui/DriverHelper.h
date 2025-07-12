@@ -62,6 +62,29 @@ inline std::string AccelMode2String(AccelMode mode) {
     }
 }
 
+inline std::string AccelMode2EnumString(AccelMode mode) {
+    switch (mode) {
+        case AccelMode_Current:
+            return "AccelMode_Current";
+        case AccelMode_Linear:
+            return "AccelMode_Linear";
+        case AccelMode_Power:
+            return "AccelMode_Power";
+        case AccelMode_Classic:
+            return "AccelMode_Classic";
+        case AccelMode_Motivity:
+            return "AccelMode_Motivity";
+        case AccelMode_Natural:
+            return "AccelMode_Natural";
+        case AccelMode_Jump:
+            return "AccelMode_Jump";
+        case AccelMode_Lut:
+            return "AccelMode_Lut";
+        default:
+            return "AccelMode_Current";
+    }
+}
+
 inline std::string AccelMode2String_CAPS(AccelMode mode) {
     switch (mode) {
         case AccelMode_Current:
@@ -75,7 +98,7 @@ inline std::string AccelMode2String_CAPS(AccelMode mode) {
         case AccelMode_Motivity:
             return "MOTIVITY";
         case AccelMode_Natural:
-        return "NATURAL";
+            return "NATURAL";
         case AccelMode_Jump:
             return "JUMP";
         case AccelMode_Lut:
@@ -99,10 +122,29 @@ inline AccelMode AccelMode_From_String(std::string mode_text) {
     else if (mode_text == "classic")
         return AccelMode_Classic;
     else if (mode_text == "motivity")
-	return AccelMode_Motivity;
+	    return AccelMode_Motivity;
     else if (mode_text == "natural")
-	return AccelMode_Natural;
+	    return AccelMode_Natural;
     else if (mode_text == "jump")
+        return AccelMode_Jump;
+    else
+        return AccelMode_Current;
+}
+
+inline AccelMode AccelMode_From_EnumString(const std::string& mode_text) {
+    if(mode_text == "AccelMode_Current")
+        return AccelMode_Current;
+    else if (mode_text == "AccelMode_Linear")
+        return AccelMode_Linear;
+    else if (mode_text == "AccelMode_Power")
+        return AccelMode_Power;
+    else if (mode_text == "AccelMode_Classic")
+        return AccelMode_Classic;
+    else if (mode_text == "AccelMode_Motivity")
+        return AccelMode_Motivity;
+    else if (mode_text == "AccelMode_Natural")
+        return AccelMode_Natural;
+    else if (mode_text == "AccelMode_Jump")
         return AccelMode_Jump;
     else
         return AccelMode_Current;

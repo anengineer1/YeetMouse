@@ -12,6 +12,24 @@ void update_constants(void) {
     modesConst.accel_sub_1 = FP64_Sub(g_Acceleration, FP64_1);
     modesConst.exp_sub_1 = FP64_Sub(g_Exponent, FP64_1);
 
+    // Natural
+    if (g_AccelerationMode == AccelMode_Natural) {
+        if (modesConst.exp_sub_1 == 0 || g_Exponent == FP64_1) {
+            printk("YeetMouse: Error: Acceleration mode 'Natural' is not supported for exponent 1.\n");
+            g_Acceleration = 0;
+            g_AccelerationMode = AccelMode_Current;
+        }
+        if (g_Acceleration == 0) {
+            printk("YeetMouse: Error: Acceleration mode 'Natural' is not supported for acceleration 0.\n");
+            g_Acceleration = 0;
+            g_AccelerationMode = AccelMode_Current;
+        }
+        else {
+            modesConst.auxiliar_accel = FP64_DivPrecise(g_Acceleration, FP64_Abs(modesConst.exp_sub_1));
+            modesConst.auxiliar_constant = FP64_DivPrecise(-modesConst.exp_sub_1, modesConst.auxiliar_accel);
+        }
+    }
+
     // Jump
     if (g_AccelerationMode == AccelMode_Jump) {
         if (g_Exponent == 0 || g_Midpoint == 0) {
@@ -156,27 +174,25 @@ FP_LONG accel_jump(FP_LONG speed) {
 }
 
 FP_LONG accel_natural(FP_LONG speed) {
-
     if (speed <= g_Midpoint) {
-	speed = FP64_1;
+        speed = FP64_1;
     } else {
-	FP_LONG limit = FP64_Sub(g_Exponent, FP64_1);
-        FP_LONG auxiliar_accel =
-            FP64_DivPrecise(g_Acceleration, FP64_Abs(limit));
         FP_LONG n_offset_x = FP64_Sub(g_Midpoint, speed);
-        FP_LONG decay = FP64_Exp(FP64_Mul(auxiliar_accel, n_offset_x));
+        FP_LONG decay = FP64_Exp(FP64_Mul(modesConst.auxiliar_accel, n_offset_x));
 
         if (g_UseSmoothing) {
-            FP_LONG auxiliar_constant = FP64_DivPrecise(-limit, auxiliar_accel);
             FP_LONG decay_auxiliaraccel =
-                FP64_DivPrecise(decay, auxiliar_accel);
+                    FP64_DivPrecise(decay, modesConst.auxiliar_accel);
             FP_LONG numerator = FP64_Add(
-                FP64_Mul(limit, FP64_Sub(decay_auxiliaraccel, n_offset_x)),
-					 auxiliar_constant);
+                FP64_Mul(modesConst.exp_sub_1, FP64_Sub(decay_auxiliaraccel, n_offset_x)),
+                modesConst.auxiliar_constant);
             speed = FP64_Add(FP64_DivPrecise(numerator, speed), FP64_1);
-	} else {
-	    speed = FP64_Add(FP64_Mul(limit, (FP64_Sub(FP64_1, FP64_DivPrecise(FP64_Sub(g_Midpoint, FP64_Mul(decay, n_offset_x)), speed)))), FP64_1);
-	}
+        } else {
+            speed = FP64_Add(
+                FP64_Mul(modesConst.exp_sub_1, (FP64_Sub(
+                             FP64_1, FP64_DivPrecise(FP64_Sub(g_Midpoint, FP64_Mul(decay, n_offset_x)), speed)))),
+                FP64_1);
+        }
     }
 
     return speed;
