@@ -224,10 +224,9 @@ int OnGui() {
             }
             case AccelMode_Classic: // Classic
             {
-		
 #ifdef USE_INPUT_DRAG
-                        change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.001, 0.001, 2, "Acceleration %0.3f");
-                        change |= ImGui::DragFloat("##Exp_Param", &params[selected_mode].exponent, 0.01, 2.01, 5, "Exponent %0.2f");
+                change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.001, 0.001, 2, "Acceleration %0.3f");
+                change |= ImGui::DragFloat("##Exp_Param", &params[selected_mode].exponent, 0.01, 2.01, 5, "Exponent %0.2f");
 #else
                 change |= ImGui::SliderFloat("##Accel_Param", &params[selected_mode].accel, 0.001, 2,
                                              "Acceleration %0.3f");
@@ -236,16 +235,14 @@ int OnGui() {
                 change |= ImGui::Checkbox("##Smoothing_Param", &params[selected_mode].useSmoothing);
                 ImGui::SameLine();
                 ImGui::Text("Use Smooth Capping");
+                if (params[selected_mode].useSmoothing) {
 #ifdef USE_INPUT_DRAG
-		if (params[selected_mode].useSmoothing) {
-		    change |= ImGui::DragFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.05, 0.1, 50, "Output Limit %0.2f");
-		}
+                    change |= ImGui::DragFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.02, 0.1, 50, "Output Limit %0.2f");
 #else
-		if (params[selected_mode].useSmoothing) {
-		    change |= ImGui::SliderFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.1, 50,
+                    change |= ImGui::SliderFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.1, 50,
                                                  "Output Limit %0.2f");
-		}
 #endif
+                }
                 break;
             }
             case AccelMode_Motivity: // Motivity

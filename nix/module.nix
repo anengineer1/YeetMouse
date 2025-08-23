@@ -159,7 +159,7 @@ let
           param = "useSmoothing";
         }
         {
-          value = toString params.classic.useSmoothing;
+          value = toString params.classic.midpoint;
           param = "Midpoint";
         }
       ];

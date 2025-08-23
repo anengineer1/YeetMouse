@@ -154,7 +154,6 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetUseSmoothing(false);
         TestManager::UpdateModesConstants();
 
-        // 1
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelClassic(value);
@@ -171,13 +170,12 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
 
-         // 2
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelClassic(value);
 
             supervisor.result &= IsAccelValueGood(res);
-            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value), 0.001);
+            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
         }
 
         supervisor.NextTest();
@@ -188,13 +186,12 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
 
-	// 3
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelClassic(value);
 
             supervisor.result &= IsAccelValueGood(res);
-            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value), 0.001);
+            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
         }
 
         supervisor.NextTest();
@@ -205,7 +202,6 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
 
-        // 4
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelClassic(value);
@@ -217,12 +213,11 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         supervisor.NextTest();
         TestManager::SetAccelMode(AccelMode_Classic);
         TestManager::SetAcceleration(0.04f);
-	TestManager::SetExponent(9.f);
-	TestManager::SetMidpoint(5.f);
-	TestManager::SetUseSmoothing(true);
+	    TestManager::SetExponent(9.f);
+	    TestManager::SetMidpoint(5.f);
+	    TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
 
-        // 5
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelClassic(value);
@@ -239,7 +234,6 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
 
-        // 6
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
             float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
             auto res = TestManager::AccelClassic(value);
@@ -256,7 +250,6 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
 
-        // 7
         if (TestManager::ValidateConstants()) { // Should be invalid!
             fprintf(stderr, "Valid constants (should be invalid)\n");
             supervisor.result = false;
@@ -269,7 +262,7 @@ bool Tests::TestAccelClassic(float range_min, float range_max) {
         TestManager::SetMidpoint(0.f);
         TestManager::SetUseSmoothing(true);
         TestManager::UpdateModesConstants();
-        // 8
+
         if (TestManager::ValidateConstants()) { // Should be invalid!
             fprintf(stderr, "Valid constants (should be invalid)\n");
             supervisor.result = false;

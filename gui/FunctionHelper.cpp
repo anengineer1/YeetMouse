@@ -140,30 +140,30 @@ float CachedFunction::EvalFuncAt(float x) {
         }
         case AccelMode_Classic: // Classic
         {
-	    if (params->useSmoothing) {
-		// The sign is used to have the possibility to
-		// allow negative values
-		float sign = 1.0;
-		float accel_raised = std::pow(params->accel, params->exponent - 1.0);
+            if (params->useSmoothing) {
+                // The sign is used to have the possibility to
+                // allow negative values
+                float sign = 1.0;
+                float accel_raised = std::pow(params->accel, params->exponent - 1.0);
                 float cap_y = params->midpoint - 1.0;
                 float cap_x = 0.0;
                 if (cap_y != 0.0) {
-		    if (cap_y < 0.0) {
-			cap_y = -cap_y;
-			sign = -sign;
+                    if (cap_y < 0.0) {
+                        cap_y = -cap_y;
+                        sign = -sign;
                     }
                     cap_x = (std::pow(cap_y / params->exponent, 1.0 / (params->exponent - 1.0))) / params->accel;
-		}
+                }
                 float m = accel_raised * std::pow(cap_x, params->exponent - 1.0);
                 float constant = (m - cap_y) * cap_x;
                 if (x < cap_x) {
                     val = sign * std::pow(x * params->accel, params->exponent - 1.0) + 1.0;
-		} else {
+                } else {
                     val = sign * (constant / x + cap_y) + 1.0;
-		}
-	    } else {
-		val = std::pow(x * params->accel, params->exponent - 1.0) + 1.0;
-	    }
+                }
+            } else {
+                val = std::pow(x * params->accel, params->exponent - 1.0) + 1.0;
+            }
             break;
         }
         case AccelMode_Motivity: // Motivity
@@ -388,9 +388,9 @@ bool CachedFunction::ValidateSettings() {
     }
 
     if (params->accelMode == AccelMode_Classic) {
-	if (params->useSmoothing && (params->exponent == 0 || params->exponent - 1 == 0)) {
-	    isValid = false;
-	}
+        if (params->useSmoothing && (params->exponent == 0 || params->exponent - 1 == 0)) {
+            isValid = false;
+        }
     }
 
     if (params->accelMode == AccelMode_Power) {

@@ -43,12 +43,9 @@ void update_constants(void) {
 
     // Classic
     if (g_AccelerationMode == AccelMode_Classic) {
-            if (g_UseSmoothing && (g_Exponent == 0 || modesConst.exp_sub_1 == 0)) {
+        if (g_UseSmoothing && (g_Exponent == 0 || modesConst.exp_sub_1 == 0)) {
             printk("YeetMouse: Error: Acceleration mode 'Classic' is not supported for exponent 0 or 1 while using the the smooth cap.\n");
-            g_Exponent = FP64_FromFloat(2.1f);
-            g_Midpoint = FP64_FromFloat(6.f);
-            g_Acceleration = FP64_FromFloat(0.15f);
-            g_UseSmoothing = false;
+            g_Acceleration = 0;
             g_AccelerationMode = AccelMode_Current;
         } else {
             if (g_UseSmoothing) {
@@ -58,10 +55,11 @@ void update_constants(void) {
                 FP_LONG constant = FP64_FromInt(0);
                 if (cap_y != 0) {
                     if (cap_y < 0) {
-                    cap_y = FP64_Mul(cap_y, Neg1);
-                    sign = Neg1;
+                        cap_y = FP64_Mul(cap_y, Neg1);
+                        sign = Neg1;
                     }
-                    cap_x = FP64_DivPrecise(FP64_Pow(FP64_DivPrecise(cap_y, g_Exponent), FP64_DivPrecise( FP64_1, modesConst.exp_sub_1)), g_Acceleration);
+                    cap_x = FP64_DivPrecise(FP64_Pow(FP64_DivPrecise(cap_y, g_Exponent),
+                                                     FP64_DivPrecise(FP64_1, modesConst.exp_sub_1)), g_Acceleration);
                 }
                 FP_LONG factor = FP64_DivPrecise(FP64_Sub(g_Exponent, FP64_1), g_Exponent);
                 constant = FP64_Mul(cap_y, cap_x);
@@ -322,16 +320,18 @@ FP_LONG accel_classic(FP_LONG speed) {
     // if Use Smooth Cap is on, we proceed to calculate the transition
     // point and the function that provides the smooth cap
     if (g_UseSmoothing) {
-	// we setup the y cap
+        // we setup the y cap
         if (speed < modesConst.classic_cap_x) {
             accel_classic_result = FP64_Mul(modesConst.classic_sign, accel_classic_result);
             speed = FP64_Add(accel_classic_result, FP64_1);
-	} else {
-            speed = FP64_Add(FP64_Mul(modesConst.classic_sign, FP64_Add(FP64_DivPrecise(modesConst.classic_constant, speed), modesConst.classic_cap_y)), FP64_1);
-	}
-    } else {
-	speed = FP64_Add(accel_classic_result, FP64_1);
-    }
+        } else {
+            speed = FP64_Add(FP64_Mul(modesConst.classic_sign,
+                                      FP64_Add(FP64_DivPrecise(modesConst.classic_constant, speed),
+                                               modesConst.classic_cap_y)), FP64_1);
+        }
+    } else
+        speed = FP64_Add(accel_classic_result, FP64_1);
+
     return speed;
 }
 
