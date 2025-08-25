@@ -207,6 +207,17 @@ int OnGui() {
                                              "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
                 ImGui::SetItemTooltip("Ctrl+LMB to input any value you want");
 #endif
+                change |= ImGui::Checkbox("##Smoothing_Param", &params[selected_mode].useSmoothing);
+                ImGui::SameLine();
+                ImGui::Text("Use Smooth Capping");
+                if (params[selected_mode].useSmoothing) {
+#ifdef USE_INPUT_DRAG
+                    change |= ImGui::DragFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.02, 0.1, 50, "Output Limit %0.2f");
+#else
+                    change |= ImGui::SliderFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.1, 50,
+                                                 "Output Limit %0.2f");
+#endif
+                }
                 break;
             }
             case AccelMode_Power: // Power

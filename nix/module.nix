@@ -50,6 +50,11 @@ let
             description = "Linear acceleration multiplier";
           };
         };
+        midpoint = mkOption {
+            type = floatRange 0.1 50.0;
+            default = 6.0;
+            apply = toString;
+            description = "Only used when useSmoothing is enabled, it a applies a smooth cap to the set value";
       };
       apply = params: [
         {
@@ -59,6 +64,10 @@ let
         {
           value = toString params.acceleration;
           param = "Acceleration";
+        }
+        {
+          value = toString params.classic.midpoint;
+          param = "Midpoint";
         }
       ];
     };

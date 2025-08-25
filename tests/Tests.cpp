@@ -31,6 +31,72 @@ bool Tests::TestAccelLinear(float range_min, float range_max) {
 
         TestManager::SetAccelMode(AccelMode_Linear);
         TestManager::SetAcceleration(0.0001f);
+        TestManager::SetUseSmoothing(false);
+        TestManager::SetMidpoint(0.f);
+        TestManager::UpdateModesConstants();
+
+        for (int i = 0; i < BASIC_TEST_STEPS; i++) {
+            float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
+            auto res = TestManager::AccelLinear(value);
+
+            supervisor.result &= IsAccelValueGood(res);
+            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+        }
+
+        supervisor.NextTest();
+
+        TestManager::SetAccelMode(AccelMode_Linear);
+        TestManager::SetAcceleration(0.0001f);
+        TestManager::SetUseSmoothing(true);
+        TestManager::SetMidpoint(0.f);
+        TestManager::UpdateModesConstants();
+
+        for (int i = 0; i < BASIC_TEST_STEPS; i++) {
+            float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
+            auto res = TestManager::AccelLinear(value);
+
+            supervisor.result &= IsAccelValueGood(res);
+            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+        }
+
+        supervisor.NextTest();
+
+        TestManager::SetAccelMode(AccelMode_Linear);
+        TestManager::SetAcceleration(0.5f);
+        TestManager::SetUseSmoothing(true);
+        TestManager::SetMidpoint(2.f);
+        TestManager::UpdateModesConstants();
+
+        for (int i = 0; i < BASIC_TEST_STEPS; i++) {
+            float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
+            auto res = TestManager::AccelLinear(value);
+
+            supervisor.result &= IsAccelValueGood(res);
+            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+        }
+
+        supervisor.NextTest();
+
+        TestManager::SetAccelMode(AccelMode_Linear);
+        TestManager::SetAcceleration(1.f);
+        TestManager::SetUseSmoothing(true);
+        TestManager::SetMidpoint(1.5f);
+        TestManager::UpdateModesConstants();
+
+        for (int i = 0; i < BASIC_TEST_STEPS; i++) {
+            float value = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
+            auto res = TestManager::AccelLinear(value);
+
+            supervisor.result &= IsAccelValueGood(res);
+            supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
+        }
+
+        supervisor.NextTest();
+
+        TestManager::SetAccelMode(AccelMode_Linear);
+        TestManager::SetAcceleration(5.f);
+        TestManager::SetUseSmoothing(true);
+        TestManager::SetMidpoint(6.f);
         TestManager::UpdateModesConstants();
 
         for (int i = 0; i < BASIC_TEST_STEPS; i++) {
