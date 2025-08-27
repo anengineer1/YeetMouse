@@ -201,7 +201,8 @@ int OnGui() {
             case AccelMode_Linear: // Linear
             {
 #ifdef USE_INPUT_DRAG
-                        change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.0001, 0.0005, 0.1, "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
+                change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.0001, 0.0005, 0.1,
+                                           "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
 #else
                 change |= ImGui::SliderFloat("##Accel_Param", &params[selected_mode].accel, 0.0005, 0.1,
                                              "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
@@ -212,7 +213,8 @@ int OnGui() {
                 ImGui::Text("Use Smooth Capping");
                 if (params[selected_mode].useSmoothing) {
 #ifdef USE_INPUT_DRAG
-                    change |= ImGui::DragFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.02, 0.1, 50, "Output Limit %0.2f");
+                    change |= ImGui::DragFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.02, 0.1, 50,
+                                               "Output Limit %0.2f");
 #else
                     change |= ImGui::SliderFloat("##MidPoint_Param", &params[selected_mode].midpoint, 0.1, 50,
                                                  "Output Limit %0.2f");

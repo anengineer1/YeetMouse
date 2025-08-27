@@ -43,7 +43,12 @@ void update_constants(void) {
 
     // Linear
     if (g_AccelerationMode == AccelMode_Linear) {
-        if (g_UseSmoothing) {
+        if (g_Acceleration == 0) {
+            printk("YeetMouse: Error: Acceleration mode 'Linear' is not supported for acceleration 0.\n");
+            g_Acceleration = 0;
+            g_AccelerationMode = AccelMode_Current;
+        }
+        else if (g_UseSmoothing) {
             FP_LONG sign = FP64_1;
             FP_LONG cap_y = FP64_Sub(g_Midpoint, FP64_1);
             FP_LONG cap_x = FP64_FromInt(0);

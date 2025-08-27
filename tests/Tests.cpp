@@ -106,6 +106,19 @@ bool Tests::TestAccelLinear(float range_min, float range_max) {
             supervisor.result &= IsAccelValueGood(res);
             supervisor.result &= IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(value));
         }
+
+        supervisor.NextTest();
+
+        TestManager::SetAccelMode(AccelMode_Linear);
+        TestManager::SetAcceleration(0.0f);
+        TestManager::SetUseSmoothing(true);
+        TestManager::SetMidpoint(2.f);
+        TestManager::UpdateModesConstants();
+
+        if (TestManager::ValidateConstants()) { // Should be invalid!
+            fprintf(stderr, "Valid constants (should be invalid)\n");
+            supervisor.result = false;
+        }
     }
     catch (std::exception &ex) {
         fprintf(stderr, "Exception: %s, in Linear mode\n", ex.what());
