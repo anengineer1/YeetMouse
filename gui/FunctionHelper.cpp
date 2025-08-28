@@ -156,9 +156,30 @@ float CachedFunction::EvalFuncAt(float x) {
         {
             if (x <= offset_x)
                 val = params->midpoint;
-            else
-                val = std::pow(x * params->accel, params->exponent) + (power_constant / x);
-
+            else {
+                if (params->useSmoothing) {
+                    float cap_y = params->motivity;
+                    float cap_x = 0.0;
+                    if (cap_y > 0.0) {
+                        cap_x = (std::pow(cap_y / (params->exponent + 1.0), 1.0 / params->exponent)) / params->accel;
+                    }
+                    float base_fn = cap_y;
+                    if (x > offset_x) {
+			base_fn = std::pow(cap_x * params->accel, params->exponent) + (power_constant / cap_x);
+		    }
+                    // float m = std::pow(params->accel, params->exponent) *
+                    //           std::pow(cap_x, params->exponent);
+                    float m = base_fn;
+                    float constant = (m - cap_y) * cap_x;
+                    if (x < cap_x) {
+			val = std::pow(x * params->accel, params->exponent) + (power_constant / x);
+                    } else {
+			val = constant / x + cap_y;
+                    }
+		} else {
+                  val = std::pow(x * params->accel, params->exponent) + (power_constant / x);
+                }
+	    }
             //val = std::pow(x * params->accel, params->exponent) + (((std::pow(params->midpoint / (params->exponent + 1), 1 / params->exponent) / params->accel) * params->midpoint * params->exponent / (params->exponent + 1)) / x);
 
             break;
@@ -420,6 +441,10 @@ bool CachedFunction::ValidateSettings() {
 
     if (params->accelMode == AccelMode_Power) {
         if (std::pow(params->midpoint / (params->exponent + 1), 1 / params->exponent) / params->accel > 1e8) {
+            isValid = false;
+        }
+
+        if (params->useSmoothing && (params->motivity <= params->midpoint)) {
             isValid = false;
         }
 
