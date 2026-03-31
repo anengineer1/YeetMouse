@@ -25,6 +25,7 @@ let
 
     setSourceRoot = "export sourceRoot=$(pwd)/source";
     nativeBuildInputs = with pkgs; kernel.moduleBuildDependencies ++ [
+      pkg-config
       makeWrapper
       autoPatchelfHook
       copyDesktopItems
@@ -41,14 +42,12 @@ let
       "M=$(sourceRoot)/driver"
     ];
 
-    preBuild = ''
-      cp $sourceRoot/driver/config.sample.h $sourceRoot/driver/config.h
-    '';
-
     LD_LIBRARY_PATH = "/run/opengl-driver/lib:${lib.makeLibraryPath buildInputs}";
 
     postBuild = ''
-      make "-j$NIX_BUILD_CORES" -C $sourceRoot/gui "M=$sourceRoot/gui" "LIBS=-lglfw -lGL"
+      make "-j$NIX_BUILD_CORES" -C $sourceRoot/gui "M=$sourceRoot/gui" \
+        "LIBS=-lglfw -lGL" \
+        "CXXFLAGS=-Wno-sign-compare -Wno-unused-function -Wno-return-type"
     '';
 
     postInstall = let
