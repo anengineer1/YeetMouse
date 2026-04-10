@@ -232,9 +232,9 @@ int OnGui() {
             case AccelMode_Linear: // Linear
             {
 #ifdef USE_INPUT_DRAG
-                change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.0001, 0.0005, 0.1, "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
+                change |= ImGui::DragFloat("##Accel_Param", &params[selected_mode].accel, 0.0001, 0.0005, 1, "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
 #else
-                change |= ImGui::SliderFloat("##Accel_Param", &params[selected_mode].accel, 0.0, 0.1,
+                change |= ImGui::SliderFloat("##Accel_Param", &params[selected_mode].accel, 0.0, 1,
                                              "Acceleration %0.4f", ImGuiSliderFlags_Logarithmic);
                 ImGui::SetItemTooltip("Ctrl+LMB to input any value you want");
 #endif
@@ -1152,7 +1152,7 @@ void ResetParameters(void) {
         }
 
         if (mode == AccelMode_Linear)
-            params[mode].accel = fminf(0.1, params[mode].accel);
+            params[mode].accel = fminf(1.0, params[mode].accel);
 
         if (mode == AccelMode_Classic)
             params[mode].exponent = fmaxf(fminf(params[mode].exponent, 5), 2.1);
