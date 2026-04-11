@@ -1,5 +1,5 @@
 #include "DriverHelper.h"
-#include "External/FixedMath/Fixed64.h"
+#include <FixedMath/Fixed64.h>
 #include <fstream>
 #include <filesystem>
 #include <iostream>
@@ -10,8 +10,8 @@
 #include <sys/stat.h>
 #include <set>
 
-#include "External/ImGui/imgui_internal.h"
-#include "External/ImGui/implot.h"
+#include <ImGui/imgui_internal.h>
+#include <ImGui/implot.h>
 
 template<typename Ty>
 bool GetParameterTy(const std::string &param_name, Ty &value) {
@@ -216,7 +216,8 @@ namespace DriverHelper {
                     else
                         visited_x.insert(p);
                 }
-                ((idx % 2 == 0) ? out_x : out_y)[idx++ / 2] = p;
+                ((idx % 2 == 0) ? out_x : out_y)[idx / 2] = p;
+                idx++;
 
                 //((idx % 2 == 0) ? out_x : out_y)[idx++ / 2] = p;
 
@@ -285,7 +286,8 @@ namespace DriverHelper {
         double p = 0;
         while (idx < MAX_LUT_ARRAY_SIZE * 2 && ss >> p) {
             //printf("idx = %zu, p = %f\n", idx, p);
-            (idx % 2 == 0 ? out_x : out_y)[idx++ / 2] = p;
+            (idx % 2 == 0 ? out_x : out_y)[idx / 2] = p;
+            idx++;
 
             char nextC = ss.peek();
             if (nextC == ';' || nextC == ',')
@@ -315,7 +317,9 @@ namespace DriverHelper {
         res &= GetParameterF("Midpoint", params.midpoint);
         res &= GetParameterF("Motivity", params.motivity);
         res &= GetParameterF("PreScale", params.preScale);
-        res &= GetParameterI("AccelerationMode", reinterpret_cast<int &>(params.accelMode));
+        int accelMode{};
+        res &= GetParameterI("AccelerationMode", accelMode);
+        params.accelMode = static_cast<AccelMode>(accelMode);
         res &= GetParameterB("UseSmoothing", params.useSmoothing);
         res &= GetParameterI("LutSize", params.lutSize);
         res &= GetParameterF("RotationAngle", params.rotation);
