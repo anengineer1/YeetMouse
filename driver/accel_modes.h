@@ -1,6 +1,13 @@
 #ifndef ACCEL_MODES_H
 #define ACCEL_MODES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef TEST_ENV
+#include "tests/config.h"
+#endif
 #include <linux/module.h>
 #include "FixedMath/Fixed64.h"
 
@@ -78,5 +85,9 @@ FP_LONG accel_synchronous(FP_LONG speed);
 FP_LONG accel_natural(FP_LONG speed);
 FP_LONG accel_jump(FP_LONG speed);
 FP_LONG accel_lut(FP_LONG speed);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //ACCEL_MODES_H

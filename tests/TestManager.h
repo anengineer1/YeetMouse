@@ -3,7 +3,7 @@
 
 #include "shared_definitions.h"
 #include "driver/accel_modes.h"
-#include "../gui/FunctionHelper.h"
+#include "gui/FunctionHelper.h"
 
 ///
 /// Class for interfacing with the 'fake' driver

@@ -3,11 +3,9 @@
 #include <array>
 #include <cmath>
 
+#include "config.h"
 #include "TestManager.h"
-#include "driver/accel_modes.h"
-
-#include "../gui/FunctionHelper.h"
-#include "driver/config.h"
+#include "gui/FunctionHelper.h"
 
 //static CachedFunction functions[AccelMode_Count];
 
@@ -1035,7 +1033,7 @@ void Tests::TestSupervisor::TestPass() {
     auto millis = duration.count() / 1000;
 
     if (test_idx > 1) {
-        printf("Test #%d: %s (%lds %ldms %lld\xC2\xB5s)\n" RESET, test_idx - 1, result ? GREEN "Passed" : RED "Failed",
+        printf("Test #%d: %s (%lds %ldms %ld\xC2\xB5s)\n" RESET, test_idx - 1, result ? GREEN "Passed" : RED "Failed",
                seconds, millis, duration.count() % 1000);
     }
 }

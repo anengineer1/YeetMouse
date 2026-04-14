@@ -2,11 +2,11 @@
 #define TESTS_H
 
 
-#include <vector>
-#include "../shared_definitions.h"
-#include "driver/config.h"
-#include "driver/FixedMath/Fixed64.h"
 #include <chrono>
+#include <vector>
+#include "config.h"
+#include "shared_definitions.h"
+#include "driver/FixedMath/Fixed64.h"
 
 #define BASIC_TEST_STEPS 1000
 #define BASIC_TEST_STEPS_REDUCED 100

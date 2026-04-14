@@ -25,20 +25,15 @@ if (CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64le")
     add_compile_definitions(__ppc64le__)
 endif()
 
-file(GLOB driver_source "../driver/accel_modes.[c|h]")
-file(GLOB fixedpoint_source "../driver/FixedMath/*")
-
-# Copy driver source files over
-# IF THE CMAKE FAILS HERE, JUST RE-RUN IT
-file(COPY ${driver_source} DESTINATION "${CMAKE_HOME_DIRECTORY}/driver")
-file(COPY ${fixedpoint_source} DESTINATION "${CMAKE_HOME_DIRECTORY}/driver/FixedMath")
-file(COPY "../shared_definitions.h" DESTINATION "${CMAKE_HOME_DIRECTORY}")
-
-# Run a python script to clean-up the freshly copied source files
-execute_process(COMMAND python3 CleanUpFiles.py
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-
-add_executable(YeetMouseTests main.cpp driver/accel_modes.c
+add_executable(YeetMouseTests main.cpp
         TestManager.cpp
         Tests.cpp
-        ../gui/FunctionHelper.cpp)
+        ../gui/FunctionHelper.cpp
+        ../driver/accel_modes.c)
+
+target_compile_definitions(YeetMouseTests PRIVATE TEST_ENV)
+
+target_include_directories(YeetMouseTests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/../gui/External
+)
