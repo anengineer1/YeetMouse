@@ -13,6 +13,3 @@ ifeq ($(ARCH), ppc64le)
 endif
 
 #ccflags-y += -mhard-float
-
-all:
-	cp -n config.sample.h config.h
