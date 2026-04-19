@@ -459,6 +459,7 @@ int OnGui() {
                                 change |= ImGui::DragFloat("##pos2x", &p1.x, 0.5, p_min, p_max, "%.3f x");
                                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
                                 change |= ImGui::DragFloat("##pos2y", &p1.y, 0.01, 0, 10, "%.3f y");
+                                ImGui::Checkbox("Enable", &p1.enabled);
                                 ImGui::PopItemWidth();
                                 ImGui::PopItemWidth();
                                 ImGui::EndGroup();

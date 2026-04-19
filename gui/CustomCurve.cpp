@@ -1,5 +1,6 @@
 #include "CustomCurve.h"
 
+#include <ImGui/imgui.h>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -27,7 +28,7 @@ void CustomCurve::ApplyCurveConstraints() {
 }
 
 // Cubic Bezier derivatives
-ImVec2 BezierFirstOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, ImVec2 p3, float t) {
+ImVec2 CubicBezierFirstOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, ImVec2 p3, float t) {
     float u = (1 - t);
     float w1 = 3 * (u * u);
     float w2 = 6 * (u * t);
@@ -35,11 +36,53 @@ ImVec2 BezierFirstOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, ImVec2 p3, fl
     return ((p1 - p0) * w1) + ((p2 - p1) * w2) + ((p3 - p2) * w3);
 }
 
-ImVec2 BezierSecondOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, ImVec2 p3, float t) {
+ImVec2 CubicBezierSecondOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, ImVec2 p3, float t) {
     float u = (1 - t);
     float w1 = 6 * u;
     float w2 = 6 * t;
     return (p2 - p1 * 2 + p0) * w1 + (p3 - p2 * 2 + p1) * w2;
+}
+
+ImVec2 QuadraticBezierFirstOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, float t) {
+    float u = (1 - t);
+    float w1 = 2 * u;
+    float w2 = 2 * t;
+    return (p0 - p1) * w1 + (p2 - p1) * w2;
+}
+
+ImVec2 QuadraticBezierSecondOrderDerivative(ImVec2 p0, ImVec2 p1, ImVec2 p2, float t) {
+    return ( p2 - p1 *2.f + p0 ) * 2;
+}
+
+ImVec2 BezierFirstOrderDerivative(ImVec2 p0, ControlPoint_Vec2 p1, ControlPoint_Vec2 p2, ControlPoint_Vec2 p3,float t) {
+  if (p1.enabled && p2.enabled)
+      return CubicBezierFirstOrderDerivative(p0, p1, p2, p3, t);
+
+  if (p1.enabled || p2.enabled)
+      return QuadraticBezierFirstOrderDerivative(p0, p1.enabled ? p1 : p2, p3, t);
+
+    return p0 - p3;
+}
+
+ImVec2 BezierSecondOrderDerivative(ImVec2 p0, ControlPoint_Vec2 p1, ControlPoint_Vec2 p2, ControlPoint_Vec2 p3, float t) {
+    if (p1.enabled && p2.enabled)
+        return CubicBezierSecondOrderDerivative(p0, p1, p2, p3, t);
+    if (p1.enabled || p2.enabled)
+        return QuadraticBezierSecondOrderDerivative(p0, p1.enabled ? p1 : p2, p3, t);
+    return ImVec2(0, 0);
+}
+
+ImVec2 BezierCalc(ImVec2 startPoint, ControlPoint_Vec2 controlPoint1, ControlPoint_Vec2 controlPoint2,
+                  ImVec2 endPoint, float t) {
+    if (controlPoint1.enabled && controlPoint2.enabled) {
+        return ImBezierCubicCalc(startPoint, controlPoint1, controlPoint2, endPoint, t);
+    }
+
+    if (controlPoint1.enabled || controlPoint2.enabled) {
+        return ImBezierQuadraticCalc(startPoint, controlPoint1.enabled ? controlPoint1 : controlPoint2, endPoint, t);
+    }
+
+    return ImLerp(startPoint, endPoint, t);
 }
 
 // Spreads points based on the rate of change and other things
@@ -66,7 +109,7 @@ int CustomCurve::ExportCurveToLUT(double *LUT_data_x, double *LUT_data_y) const 
         curve_arc_len[idx++] = 0;
         for (int j = 1; j < PRE_LUT_ARRAY_SIZE; j++) {
             const double t = j / (PRE_LUT_ARRAY_SIZE - 1.0);
-            ImVec2 p = ImBezierCubicCalc(points[i], control_points[i][0], control_points[i][1], points[i + 1], t);
+            ImVec2 p = BezierCalc(points[i], control_points[i][0], control_points[i][1], points[i + 1], t);
             ImVec2 dist = p - last_p;
             dist.y *= 30; // The graph is stretched horizontally, this accounts for that
             curve_arc_len[idx] = curve_arc_len[idx - 1] + std::sqrt(ImLengthSqr(dist));
@@ -347,7 +390,7 @@ void CustomCurve::UpdateLUT() {
     for (int i = 0; i < points.size() - 1; i++) {
         for (int j = 0; j < BEZIER_FRAG_SEGMENTS; ++j) {
             float t = (float) j / (BEZIER_FRAG_SEGMENTS - 1);
-            ImVec2 p = ImBezierCubicCalc(points[i], control_points[i][0], control_points[i][1], points[i + 1], t);
+            ImVec2 p = BezierCalc(points[i], control_points[i][0], control_points[i][1], points[i + 1], t);
             LUT_points[i * BEZIER_FRAG_SEGMENTS + j] = p;
             if (last_point.x > p.x) {
                 // Bad Curve
