@@ -1,5 +1,4 @@
 #include <array>
-#include <csignal>
 #include "gui.h"
 #include <ImGui/implot.h>
 #include "DriverHelper.h"
@@ -459,7 +458,7 @@ int OnGui() {
                                 change |= ImGui::DragFloat("##pos2x", &p1.x, 0.5, p_min, p_max, "%.3f x");
                                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
                                 change |= ImGui::DragFloat("##pos2y", &p1.y, 0.01, 0, 10, "%.3f y");
-                                ImGui::Checkbox("Enable", &p1.enabled);
+                                change |= ImGui::Checkbox("Enable", &p1.enabled);
                                 ImGui::PopItemWidth();
                                 ImGui::PopItemWidth();
                                 ImGui::EndGroup();
@@ -610,11 +609,15 @@ int OnGui() {
                         auto &p = points[i];
                         ImVec2 p1 = ImPlot::PlotToPixels(p);
                         ImVec2 p2 = ImPlot::PlotToPixels(points[(i + 1) % points.size()]);
-                        ImVec2 pc1 = ImPlot::PlotToPixels(control_points[i][0]);
-                        ImVec2 pc2 = ImPlot::PlotToPixels(control_points[i][1]);
+                        // we will only
+                        if (control_points[i][0].enabled || control_points[i][1].enabled) {
+                            ImVec2 pc1 = control_points[i][0].enabled ? ImPlot::PlotToPixels(control_points[i][0]) : ImPlot::PlotToPixels(control_points[i][1]);
+                            ImVec2 pc2 = control_points[i][1].enabled ? ImPlot::PlotToPixels(control_points[i][1]) : ImPlot::PlotToPixels(control_points[i][0]);
 
-                        ImPlot::GetPlotDrawList()->AddLine(p1, pc1, ImColor(0.7, 0.1f, 0.8, 0.8));
-                        ImPlot::GetPlotDrawList()->AddLine(p2, pc2, ImColor(0.7, 0.1f, 0.8, 0.8));
+                            ImPlot::GetPlotDrawList()->AddLine(p1, pc1, ImColor(0.7, 0.1f, 0.8, 0.8));
+                            ImPlot::GetPlotDrawList()->AddLine(p2, pc2, ImColor(0.7, 0.1f, 0.8, 0.8));
+                        }
+
                     }
                     ImPlot::PopPlotClipRect();
                 }
@@ -802,7 +805,8 @@ int OnGui() {
                                             // the beginning and the end in the logic
                                             // in the condition for this block
                                             int new_j = j == 0 ? 1 : 0;
-                                            auto &p2 = control_points[i - new_j][new_j];
+                                            // We want to align the control point that is available, that is why we flip the value
+                                            auto &p2 = control_points[i - new_j][new_j].enabled ? control_points[i - new_j][new_j] : control_points[i - new_j][new_j ^ 1];
 
                                             // We want to preserve the current length
                                             auto length = std::sqrt(ImLengthSqr(p1 - p));

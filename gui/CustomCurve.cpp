@@ -170,7 +170,7 @@ int CustomCurve::ExportCurveToLUT(double *LUT_data_x, double *LUT_data_y) const 
         int start = edge_idx * PRE_LUT_ARRAY_SIZE;
         t = linear_map_t(tg_arc_len, start);
 
-        auto p = ImBezierCubicCalc(points[edge_idx], control_points[edge_idx][0], control_points[edge_idx][1],
+        auto p = BezierCalc(points[edge_idx], control_points[edge_idx][0], control_points[edge_idx][1],
                                    points[edge_idx + 1], t);
         auto dp = BezierFirstOrderDerivative(points[edge_idx], control_points[edge_idx][0], control_points[edge_idx][1],
                                              points[edge_idx + 1], t);
