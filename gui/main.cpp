@@ -606,17 +606,21 @@ int OnGui() {
                 if (show_custom_curve_control_points) {
                     ImPlot::PushPlotClipRect();
                     for (int i = 0; i < points.size() - 1; ++i) {
-                        auto &p = points[i];
-                        ImVec2 p1 = ImPlot::PlotToPixels(p);
-                        ImVec2 p2 = ImPlot::PlotToPixels(points[(i + 1) % points.size()]);
                         // we will only
-                        if (control_points[i][0].enabled || control_points[i][1].enabled) {
+                        if (!control_points[i][0].enabled &&
+                            !control_points[i][1].enabled) {
+                            continue;
+                        }
+                            auto &p = points[i];
+                            ImVec2 p1 = ImPlot::PlotToPixels(p);
+                            ImVec2 p2 = ImPlot::PlotToPixels(points[(i + 1) % points.size()]);
+
                             ImVec2 pc1 = control_points[i][0].enabled ? ImPlot::PlotToPixels(control_points[i][0]) : ImPlot::PlotToPixels(control_points[i][1]);
                             ImVec2 pc2 = control_points[i][1].enabled ? ImPlot::PlotToPixels(control_points[i][1]) : ImPlot::PlotToPixels(control_points[i][0]);
 
                             ImPlot::GetPlotDrawList()->AddLine(p1, pc1, ImColor(0.7, 0.1f, 0.8, 0.8));
                             ImPlot::GetPlotDrawList()->AddLine(p2, pc2, ImColor(0.7, 0.1f, 0.8, 0.8));
-                        }
+
 
                     }
                     ImPlot::PopPlotClipRect();
@@ -891,6 +895,10 @@ int OnGui() {
                 if (show_custom_curve_control_points && points.size() > 1) {
                     for (int i = 0; i < control_points.size(); ++i) {
                         for (int j = 0; j < 2; j++) {
+                            // Skip rendering if this specific control point is disabled
+                            if (!control_points[i][j].enabled) {
+                                continue;
+                            }
                             bool is_point_hovered =
                                     hovered_point != -1 && (
                                         (i == hovered_point && j == 0) || (i == hovered_point - 1 && j == 1));
