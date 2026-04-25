@@ -689,12 +689,25 @@ int OnGui() {
                             }
                         }
                         if (points.size() > 1) {
+                            // Checking if the current point in the iteration has
+                            // any control point enabled, if not, the control
+                            // point section should not be displayed
+                            bool is_start_point = i == 0;
+                            bool is_end_point = i == points.size() - 1;
+                            bool is_start_or_end_point = is_start_point || is_end_point;
+                            bool all_right_disabled = !is_end_point && !control_points[i][0].enabled && !control_points[i][1].enabled;
+                            bool all_left_disabled = !is_start_point && !control_points[i - 1][0].enabled && !control_points[i - 1][1].enabled;
+
+                            if (all_left_disabled && all_right_disabled) {
+                                ImGui::EndPopup();
+                                continue;
+                            }
+
                             ImGui::SeparatorText("Control points");
                             ImGui::Checkbox("Polar coordinates", &p.use_polar_coordinates);
                             ImGui::SetItemTooltip("Use polar coordinates for the control points");
 
                             // Begin grouping to from a grid of widgets
-                            bool is_start_or_end_point = (i == 0 || (i == points.size() - 1));
                             ImGui::BeginGroup();
                             // The ternary operator is to handle the start and
                             // end point of the curve because there is no align-button
@@ -717,10 +730,13 @@ int OnGui() {
                                     ImGui::Text("y");
                                 }
                                 ImGui::TableNextRow();
-                                for (int j = (i == points.size() - 1 || i == 0) ? 0 : 1; j >= 0; j--) {
-                                    ImGui::PushID(j);
+                                for (int j = is_start_or_end_point ? 0 : 1; j >= 0; j--) {
                                     auto &p1 = control_points[i == points.size() - 1 ? (i - 1) : (i - j)][
                                         i == 0 ? 0 : i == points.size() - 1 ? 1 : j];
+                                    // That means there are no control points
+                                    if (!p1.enabled)
+                                        continue;
+                                    ImGui::PushID(j);
                                     // p.x = std::clamp(p.x, i > 0 ? points[i-1].x + 0.5f : 0, i < points.size() - 1 ? points[i+1].x - 0.5f : 1000);
                                     ImGui::TableNextColumn();
                                     if (p.use_polar_coordinates) {
