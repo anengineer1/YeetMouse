@@ -688,20 +688,22 @@ int OnGui() {
                                 control_points[i - 1][1] += drag;
                             }
                         }
-                        if (points.size() > 1) {
-                            // Checking if the current point in the iteration has
-                            // any control point enabled, if not, the control
-                            // point section should not be displayed
-                            bool is_start_point = i == 0;
-                            bool is_end_point = i == points.size() - 1;
-                            bool is_start_or_end_point = is_start_point || is_end_point;
-                            bool all_right_disabled = !is_end_point && !control_points[i][0].enabled && !control_points[i][1].enabled;
-                            bool all_left_disabled = !is_start_point && !control_points[i - 1][0].enabled && !control_points[i - 1][1].enabled;
 
-                            if (all_left_disabled && all_right_disabled) {
-                                ImGui::EndPopup();
-                                continue;
-                            }
+                        // Checking if the current point in the iteration has
+                        // any control point enabled, if not, the control
+                        // point section should not be displayed
+                        bool is_start_point = i == 0;
+                        bool is_end_point = i == points.size() - 1;
+                        bool is_start_or_end_point = is_start_point || is_end_point;
+                        bool all_left_disabled = false;
+                        bool all_right_disabled = false;
+                        bool more_than_one_point = points.size() > 1;
+                        if (more_than_one_point) {
+                            all_right_disabled = !is_end_point && !control_points[i][0].enabled && !control_points[i][1].enabled;
+                            all_left_disabled = !is_start_point && !control_points[i - 1][0].enabled && !control_points[i - 1][1].enabled;
+                        }
+
+                        if (more_than_one_point && !all_left_disabled && !all_right_disabled) {
 
                             ImGui::SeparatorText("Control points");
                             ImGui::Checkbox("Polar coordinates", &p.use_polar_coordinates);
