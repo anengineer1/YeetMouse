@@ -6,6 +6,9 @@
 
 #define EXP_ARG_THRESHOLD 16ll
 
+static bool synchronous_build_lut(void);
+static bool s_sync_lut_ready = false;
+
 // Recalculate new modes constants
 void update_constants(void) {
     // General
@@ -38,6 +41,8 @@ void update_constants(void) {
 
             modesConst.minSens = FP64_DivPrecise(FP64_1, g_Motivity);
             modesConst.maxSens = g_Motivity;
+
+            s_sync_lut_ready = false;
         }
     }
 
@@ -241,6 +246,7 @@ void update_constants(void) {
             break;
         case AccelMode_Synchronous:
             modesConst.current_func_at_0 = accel_synchronous(FP64_0_01);
+            synchronous_build_lut();
             break;
         case AccelMode_Natural:
             modesConst.current_func_at_0 = accel_natural(FP64_0_01);
@@ -277,8 +283,6 @@ static struct {
     FP_LONG x_start;                 // 2^SYNC_START
     FP_LONG data[SYNC_CAPACITY];     // monotonic over x
 } s_sync_lut;
-
-static bool s_sync_lut_ready = false;
 
 static FP_LONG synchronous_legacy(FP_LONG x) {
     if (modesConst.useClamp) {

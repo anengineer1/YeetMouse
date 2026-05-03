@@ -591,6 +591,24 @@ bool Tests::TestAccelSynchronous(float range_min, float range_max) {
             fprintf(stderr, "Valid constants (Should be invalid)\n");
             supervisor.result = false;
         }
+
+        supervisor.NextTest();
+
+        TestManager::SetAccelMode(AccelMode_Synchronous);
+        TestManager::SetExponent(1.5f);
+        TestManager::SetMidpoint(3.f);
+        TestManager::SetMotivity(10.f);
+        TestManager::SetAcceleration(0.02f);
+        TestManager::SetUseSmoothing(true);
+        TestManager::UpdateModesConstants();
+
+        for (int i = 1; i <= BASIC_TEST_STEPS; i++) {
+            float x = range_min + static_cast<float>(i) * (range_max - range_min) / BASIC_TEST_STEPS;
+            auto res = TestManager::AccelSynchronous(x);
+
+            supervisor.Validate(IsAccelValueGood(res));
+            supervisor.Validate(IsCloseEnoughRelative(res, TestManager::EvalFloatFunc(x)));
+        }
     } catch (std::exception &ex) {
         fprintf(stderr, "Exception: %s, in Synchronous mode\n", ex.what());
         supervisor.result = false;
