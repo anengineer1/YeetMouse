@@ -1,3 +1,4 @@
+#include <ImGui/imgui.h>
 #include <array>
 #include "gui.h"
 #include <ImGui/implot.h>
@@ -690,7 +691,7 @@ int OnGui() {
                         }
 
                         // Checking if the current point in the iteration has
-                        // any control point enabled, if not, the control
+                        // any control points enabled, if not, the control
                         // point section should not be displayed
                         bool is_start_point = i == 0;
                         bool is_end_point = i == points.size() - 1;
@@ -699,11 +700,14 @@ int OnGui() {
                         bool all_right_disabled = false;
                         bool more_than_one_point = points.size() > 1;
                         if (more_than_one_point) {
-                            all_right_disabled = !is_end_point && !control_points[i][0].enabled && !control_points[i][1].enabled;
-                            all_left_disabled = !is_start_point && !control_points[i - 1][0].enabled && !control_points[i - 1][1].enabled;
+                            all_right_disabled = !is_end_point && (!control_points[i][0].enabled && !control_points[i][1].enabled);
+                            all_left_disabled = !is_start_point && (!control_points[i - 1][0].enabled && !control_points[i - 1][1].enabled);
                         }
 
-                        if (more_than_one_point && !all_left_disabled && !all_right_disabled) {
+                        // Hide the control point section if nothing adjacent is active.
+                        // Every adjacent control point is disabled (for middle points),
+                        // or the lone adjacent segment has everything disabled (in case of terminal points).
+                        if (more_than_one_point && !(all_left_disabled && all_right_disabled) && !((all_left_disabled || all_right_disabled) && is_start_or_end_point)) {
 
                             ImGui::SeparatorText("Control points");
                             ImGui::Checkbox("Polar coordinates", &p.use_polar_coordinates);
@@ -733,11 +737,13 @@ int OnGui() {
                                 }
                                 ImGui::TableNextRow();
                                 for (int j = is_start_or_end_point ? 0 : 1; j >= 0; j--) {
-                                    auto &p1 = control_points[i == points.size() - 1 ? (i - 1) : (i - j)][
-                                        i == 0 ? 0 : i == points.size() - 1 ? 1 : j];
+                                    int new_i = is_end_point ? (i - 1) : (i - j);
+                                    int new_j = is_start_point ? 0 : is_end_point ? 1 : j;
+
+                                    ImVec2 &p1 = control_points[new_i][new_j].enabled ? control_points[new_i][new_j] : control_points[new_i][new_j ^ 1];
+
                                     // That means there are no control points
-                                    if (!p1.enabled)
-                                        continue;
+                                    // if (!p1.enabled) continue;
                                     ImGui::PushID(j);
                                     // p.x = std::clamp(p.x, i > 0 ? points[i-1].x + 0.5f : 0, i < points.size() - 1 ? points[i+1].x - 0.5f : 1000);
                                     ImGui::TableNextColumn();
