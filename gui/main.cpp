@@ -886,7 +886,7 @@ int OnGui() {
                         if (move_control_points_along) {
                             // Apply the Bezier point drag to it's control points
                             if (held_point == 0) {
-                                control_points[0][0] += drag;
+                                control_points[control_points[0][0].enabled ? 0 : 1][0] += drag;
                             } else if (held_point == points.size() - 1) {
                                 control_points[held_point - 1][1] += drag;
                             } else {
