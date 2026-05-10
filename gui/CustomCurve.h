@@ -26,6 +26,7 @@ struct ControlPoint_Vec2 : ImVec2 {
     bool enabled = true;
 
     ControlPoint_Vec2(float x, float y) : ImVec2(x, y) {}
+    ControlPoint_Vec2(float x, float y, bool enabled) : ImVec2(x, y), enabled(enabled) {}
     ControlPoint_Vec2(ImVec2 vec) : ImVec2(vec) {}
     ControlPoint_Vec2() : ImVec2(0, 0) {}
 };

@@ -223,7 +223,7 @@ int CustomCurve::ExportCurveToLUT(double *LUT_data_x, double *LUT_data_y) const 
 }
 
 // ctrl_p -> control_point
-// Format: point[i].x;point[i].y;ctrl_p[i][0].x,ctrl_p[i][0].y;ctrl_p[i][1].x;ctrl_p[i][1].y;point[i+1].x;point[i+1].y;ctrl_p[i][0].x;ctrl_p[i][0].y;ctrl_p[i][1].x;ctrl_p[i][1].y;point[i+1].x.y;...point[n-1].x;point[n-1];
+// Format: point[i].x;point[i].y;ctrl_p[i][0].x,ctrl_p[i][0].y;ctrl_p[i][0].enabled;ctrl_p[i][1].x;ctrl_p[i][1].y;ctrl_p[i][1].enabled;point[i+1].x;point[i+1].y;ctrl_p[i][0].x;ctrl_p[i][0].y;ctrl_p[i][0].enabled;ctrl_p[i][1].x;ctrl_p[i][1].y;ctrl_p[i][1].enabled;point[i+1].x.y;...point[n-1].x;point[n-1];
 std::string CustomCurve::ExportCustomCurve() const {
     std::stringstream out_stream;
 
@@ -239,7 +239,7 @@ std::string CustomCurve::ExportCustomCurve() const {
             // Print control points
             if (i < points.size() - 1) {
                 for (auto & cp : control_points[i]) {
-                    out_stream << cp.x << ";" << cp.y << ";";
+                    out_stream << cp.x << ";" << cp.y << ";" << cp.enabled << ";";
                 }
                 out_stream.seekp(-1, std::ios_base::cur); // remove the last comma
                 out_stream << ";";
@@ -268,21 +268,21 @@ bool CustomCurve::ImportCustomCurve(const std::string& data) {
         float p_x = 0, p_y = 0;
         double p = 0;
         while (idx < MAX_LUT_ARRAY_SIZE && ss >> p) {
-            if (idx % 2 == 0)
+            if ((idx % 8 == 0) || (idx % 8 == 2) || (idx % 8 == 5))
                 p_x = p;
-            else {
+            else if ((idx % 8 == 1) || (idx % 8 == 3) || (idx % 8 == 6)) {
                 p_y = p;
-                if (idx % 6 == 1) {
+                if (idx % 8 == 1) {
                     points.emplace_back(p_x, p_y);
                 }
-                else {
-                    if (idx % 6 == 3)
-                        control_points.emplace_back();
-                    auto j = idx % 6 - 2;
-                    control_points.back()[j / 2] = {p_x, p_y};
-                }
             }
-
+            else if ((idx % 8 == 4) || (idx % 8 == 7)) {
+                if (idx % 8 == 4) {
+                    control_points.emplace_back();
+                }
+                auto j = (idx % 8) % 2;
+                control_points.back()[j] = {p_x, p_y, (bool)p};
+            }
 
             char nextC = ss.peek();
             if (nextC == ';' || nextC == ',')
