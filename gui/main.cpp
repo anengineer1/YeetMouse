@@ -582,12 +582,14 @@ static int OnGui() {
 
         // Display currently applied parameters in the background
         if (was_initialized) {
-            ImPlot::SetNextLineStyle(ImVec4(0.3, 0.3, 0.3, 1));
-            ImPlot::PlotLine("Function in use", functions[0].values, PLOT_POINTS, functions[0].x_stride);
+            ImPlotSpec spec;
+            spec.LineColor = ImVec4(0.3, 0.3, 0.3, 1);
+            ImPlot::PlotLine("Function in use", functions[0].values, PLOT_POINTS, functions[0].x_stride, 0, spec);
         }
 
-        ImPlot::SetNextLineStyle(ImColor(0.3f, 0.5f, 0.7f, 1.0f), 2);
-
+        ImPlotSpec active_line_spec;
+        active_line_spec.LineColor = ImColor(0.3f, 0.5f, 0.7f, 1.0f);
+        active_line_spec.LineWeight = 2;
         if (selected_mode == AccelMode_CustomCurve) {
             bool is_hovered = false, is_pressed = false, is_held = false;
             bool is_interacting_with_points = false;
@@ -992,28 +994,33 @@ static int OnGui() {
 
             // Draw the curve
             if (points.size() > 1) {
+                ImPlotSpec bez_spec = active_line_spec;
+                bez_spec.Stride = sizeof(ImPlotPoint);
                 ImPlot::PlotLine("##bez", &params[selected_mode].customCurve.LUT_points[0].x,
                                  &params[selected_mode].customCurve.LUT_points[0].y,
-                                 (points.size() - 1) * BEZIER_FRAG_SEGMENTS, 0, 0, sizeof(ImPlotPoint));
+                                 (points.size() - 1) * BEZIER_FRAG_SEGMENTS, bez_spec);
 
                 if (show_custom_curve_LUT_points) {
-                    ImPlot::SetNextMarkerStyle(-1, 2);
+                    ImPlotSpec scatter_point_spec;
+                    scatter_point_spec.Marker = ImPlotMarker_Auto;
+                    scatter_point_spec.MarkerSize = 2;
+                    scatter_point_spec.LineColor = ImVec4(196/255.f,120/255.f,95/255.f, 1);
                     // Draw LUT points
                     ImPlot::PlotScatterG("LUT points", [](int idx, void *ud) {
                         auto params = static_cast<Parameters *>(ud);
                         double x = params->lutDataX[idx] / params->preScale;
                         double y = params->lutDataY[idx];
                         return ImPlotPoint(x, y);
-                    }, &params[selected_mode], params[selected_mode].lutSize);
+                    }, &params[selected_mode], params[selected_mode].lutSize, scatter_point_spec);
 
                     if (params[selected_mode].useAnisotropy) {
-                        ImPlot::SetNextLineStyle(ImVec4(0.3, 0.3, 0.8, 1), 1);
-                        ImPlot::PlotLine("Active Mode Y##ActivePlotY", functions[selected_mode].values_y, PLOT_POINTS,
-                                         functions[selected_mode].x_stride);
-                    }
+                        ImPlotSpec spec;
+                        spec.LineColor = ImVec4(0.3, 0.3, 0.8, 1);
+                        spec.LineWeight = 2;
 
-                    ImPlot::PlotLine("##ActivePlot", functions[selected_mode].values, PLOT_POINTS,
-                                     functions[selected_mode].x_stride);
+                        ImPlot::PlotLine("Active Mode Y##ActivePlotY", functions[selected_mode].values_y, PLOT_POINTS,
+                                         functions[selected_mode].x_stride, 0, spec);
+                    }
                 }
             }
 
@@ -1023,34 +1030,36 @@ static int OnGui() {
             last_held_point = held_point;
         } else {
             if (params[selected_mode].useAnisotropy) {
-                ImPlot::SetNextLineStyle(ImVec4(0.3, 0.3, 0.8, 1), 2);
+                ImPlotSpec spec;
+                spec.LineColor = ImVec4(0.3, 0.3, 0.8, 1);
+                spec.LineWeight = 2;
                 ImPlot::PlotLine("Active Mode Y##ActivePlotY", functions[selected_mode].values_y, PLOT_POINTS,
-                                 functions[selected_mode].x_stride);
+                                 functions[selected_mode].x_stride, 0, spec);
             }
 
             ImPlot::PlotLine("##ActivePlot", functions[selected_mode].values, PLOT_POINTS,
-                             functions[selected_mode].x_stride);
+                             functions[selected_mode].x_stride, 0, active_line_spec);
         }
 
-        ImPlot::SetNextMarkerStyle(IMPLOT_AUTO, IMPLOT_AUTO,
-                                   ImVec4(200 / 255.f, 140 / 255.f, 110 / 255.f, 1), 2,
-                                   ImVec4(200 / 255.f, 140 / 255.f, 110 / 255.f, 1));
+        ImPlotSpec scatter_point_spec;
+        scatter_point_spec.Marker = ImPlotMarker_Circle;
+        scatter_point_spec.MarkerSize = 4;
+        scatter_point_spec.FillColor = ImVec4(200 / 255.f, 140 / 255.f, 110 / 255.f, 1);
+        scatter_point_spec.MarkerLineColor = ImVec4(200 / 255.f, 140 / 255.f, 110 / 255.f, 1); // This does nothing
         ImPlot::PlotScatterG("Mouse Speed", [](int idx, void *data) { return *static_cast<ImPlotPoint *>(data); },
-                             &mousePoint_main,
-                             1);
+                             &mousePoint_main, 1, scatter_point_spec);
 
-        ImPlot::SetNextMarkerStyle(IMPLOT_AUTO, IMPLOT_AUTO,
-                                   ImVec4(180 / 255.f, 70 / 255.f, 80 / 255.f, 1), 2,
-                                   ImVec4(180 / 255.f, 70 / 255.f, 80 / 255.f, 1));
+        scatter_point_spec.FillColor = ImVec4(180 / 255.f, 70 / 255.f, 80 / 255.f, 1);
+        scatter_point_spec.MarkerLineColor = ImVec4(180 / 255.f, 70 / 255.f, 80 / 255.f, 1); // This does nothing
         ImPlot::PlotScatterG("Mouse Top Speed", [](int idx, void *data) { return *static_cast<ImPlotPoint *>(data); },
-                             &mousePoint_topSpeed, 1);
-
-        ImPlot::SetNextLineStyle(IMPLOT_AUTO_COL, 2);
+                             &mousePoint_topSpeed, 1, scatter_point_spec);
 
         if (hovered_mode != -1 && selected_mode != hovered_mode) {
-            ImPlot::SetNextLineStyle(ImVec4(0.7, 0.7, 0.3, 1));
+            ImPlotSpec spec;
+            spec.LineColor = ImVec4(0.7, 0.7, 0.3, 1);
+            spec.LineWeight = 1;
             ImPlot::PlotLine("##Hovered Function", functions[hovered_mode].values, PLOT_POINTS,
-                             functions[hovered_mode].x_stride);
+                             functions[hovered_mode].x_stride, 0, spec);
         }
 
         ImPlot::EndPlot();

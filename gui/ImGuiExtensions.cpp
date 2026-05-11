@@ -1,26 +1,30 @@
 #include "ImGuiExtensions.h"
 
 bool ImGui::ModeSelectable(const char *label, bool is_selected, ImGuiSelectableFlags flags, const ImVec2 &size) {
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 24));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.5);
+    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 24));
+    PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.5);
     if (!is_selected)
-        ImGui::PushStyleColor(ImGuiCol_Button, {0, 0, 0, 0});
+        PushStyleColor(ImGuiCol_Button, {0, 0, 0, 0});
     else
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+        PushStyleColor(ImGuiCol_Button, GetStyleColorVec4(ImGuiCol_FrameBg));
 
     bool ret = false;
 
-    if (ImGui::Button(label, size)) {
+    if (Button(label, size)) {
         ret = true;
     }
 
-    ImGui::PopStyleVar(2);
-    ImGui::PopStyleColor();
+    PopStyleVar(2);
+    PopStyleColor();
 
     return ret;
 }
 
-bool ImGui::ParameterSlider(const char *label, float &value, float v_speed, float v_min, float v_max) {
-    //ImGui::Text()
-    return true;
+bool ImPlot::DragPoint(int id, float *x, float *y, const ImVec4 &col, float size, ImPlotDragToolFlags flags,
+    bool *out_clicked, bool *out_hovered, bool *out_held) {
+    double d_x = *x, d_y = *y;
+    DragPoint(id, &d_x, &d_y, col, size, flags, out_clicked, out_hovered, out_held);
+    *x = static_cast<float>(d_x);
+    *y = static_cast<float>(d_y);
+    return *out_clicked;
 }
