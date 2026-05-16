@@ -740,7 +740,18 @@ int OnGui() {
                                     int new_i = is_end_point ? (i - 1) : (i - j);
                                     int new_j = is_start_point ? 0 : is_end_point ? 1 : j;
 
-                                    ImVec2 &p1 = control_points[new_i][new_j].enabled ? control_points[new_i][new_j] : control_points[new_i][new_j ^ 1];
+                                    //ImVec2 &p1 = control_points[new_i][new_j].enabled ? control_points[new_i][new_j] : control_points[new_i][new_j ^ 1];
+
+                                    ImVec2 *aux = nullptr;
+                                    if (all_right_disabled) {
+                                        aux = &points[i + 1];
+                                    }
+                                    else if (all_left_disabled) {
+                                        aux = &points[i - 1];
+                                    } else {
+                                        aux = control_points[new_i][new_j].enabled ? &control_points[new_i][new_j] : &control_points[new_i][new_j ^ 1];
+                                    }
+                                    ImVec2 &p1 = *aux;
 
                                     // That means there are no control points
                                     // if (!p1.enabled) continue;
