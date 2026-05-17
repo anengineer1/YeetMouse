@@ -707,7 +707,7 @@ int OnGui() {
                         // Hide the control point section if nothing adjacent is active.
                         // Every adjacent control point is disabled (for middle points),
                         // or the lone adjacent segment has everything disabled (in case of terminal points).
-                        if (more_than_one_point && !(all_left_disabled && all_right_disabled) && !((all_left_disabled || all_right_disabled) && is_start_or_end_point)) {
+                        //if (more_than_one_point && !(all_left_disabled && all_right_disabled) && !((all_left_disabled || all_right_disabled) && is_start_or_end_point)) {
 
                             ImGui::SeparatorText("Control points");
                             ImGui::Checkbox("Polar coordinates", &p.use_polar_coordinates);
@@ -742,14 +742,16 @@ int OnGui() {
 
                                     //ImVec2 &p1 = control_points[new_i][new_j].enabled ? control_points[new_i][new_j] : control_points[new_i][new_j ^ 1];
 
-                                    ImVec2 *aux = nullptr;
-                                    if (all_right_disabled) {
+                                    ImVec2 *aux = control_points[new_i][new_j].enabled ? &control_points[new_i][new_j] : &control_points[new_i][new_j ^ 1];
+                                    if (all_right_disabled && !j) {
                                         aux = &points[i + 1];
+                                        p_max = i < points.size() - 2 ? points[i + 2].x - 0.5f : 1000;
+                                        p_min = i > 1 ? points[i - 2].x + 0.5f : 0;
                                     }
-                                    else if (all_left_disabled) {
+                                    else if (all_left_disabled && j) {
                                         aux = &points[i - 1];
-                                    } else {
-                                        aux = control_points[new_i][new_j].enabled ? &control_points[new_i][new_j] : &control_points[new_i][new_j ^ 1];
+                                        p_max = i < points.size() - 2 ? points[i + 2].x - 0.5f : 1000;
+                                        p_min = i > 1 ? points[i - 2].x + 0.5f : 0;
                                     }
                                     ImVec2 &p1 = *aux;
 
@@ -865,7 +867,7 @@ int OnGui() {
                                 ImGui::EndTable();
                             }
                             ImGui::EndGroup();
-                        }
+                        //}
                         if (ImGui::Button("Remove", {-1, 0})) {
                             points.erase(points.begin() + i);
                             if (!points.empty()) {
