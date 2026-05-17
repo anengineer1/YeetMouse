@@ -740,8 +740,6 @@ int OnGui() {
                                     int new_i = is_end_point ? (i - 1) : (i - j);
                                     int new_j = is_start_point ? 0 : is_end_point ? 1 : j;
 
-                                    //ImVec2 &p1 = control_points[new_i][new_j].enabled ? control_points[new_i][new_j] : control_points[new_i][new_j ^ 1];
-
                                     ImVec2 *aux = control_points[new_i][new_j].enabled ? &control_points[new_i][new_j] : &control_points[new_i][new_j ^ 1];
                                     if (all_right_disabled && !j) {
                                         aux = &points[i + 1];
@@ -847,7 +845,14 @@ int OnGui() {
                                             // in the condition for this block
                                             int new_j = j == 0 ? 1 : 0;
                                             // We want to align the control point that is available, that is why we flip the value
-                                            auto &p2 = control_points[i - new_j][new_j].enabled ? control_points[i - new_j][new_j] : control_points[i - new_j][new_j ^ 1];
+                                            ImVec2 *aux = control_points[i - new_j][new_j].enabled ? &control_points[i - new_j][new_j] : &control_points[i - new_j][new_j ^ 1];
+                                            if (all_right_disabled && !new_j) {
+                                                aux = &points[i + 1];
+                                            }
+                                            else if (all_left_disabled && new_j) {
+                                                aux = &points[i - 1];
+                                            }
+                                            ImVec2 &p2 = *aux;
 
                                             // We want to preserve the current length
                                             auto length = std::sqrt(ImLengthSqr(p1 - p));
