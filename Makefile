@@ -102,7 +102,9 @@ install_gui_files:
 	install -m 644 -v $(DESKTOP_FILE) $(DESTDIR)/usr/share/applications/yeetmouse.desktop
 	install -m 644 -v $(ICON_FILE) $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/yeetmouse.png
 
-install_gui: GUI install_gui_files
+install_gui:
+	$(MAKE) GUI
+	$(MAKE) install_gui_files
 
 install_gui_optional:
 	@echo -e "\n::\033[34m Attempting optional GUI build/install\033[0m"
