@@ -179,10 +179,10 @@ remove_dkms:
 install_i_know_what_i_am_doing: all driver_install install_userspace install_config install_service install_uninstaller install_gui
 install: manual_install_msg ;
 
--include pkg.mk
-pkgarch: pkg_arch
+pkgarch:
 	@echo -e "\n::\033[34m Building installable arch package\033[0m"
 	@echo "====================================================="
+	$(MAKE) -f pkg.mk pkg_arch
 	@mv ./pkg/build/arch/yeetmouse*.zst .
 
 manual_install_msg:

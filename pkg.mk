@@ -1,5 +1,6 @@
 .ONESHELL: # shell-like behaviour. Reference global variables via ${varname} and local make variables via $${varname}
 SHELL := /bin/bash
+.SHELLFLAGS := -e -c
 
 ROOT=$(shell pwd)/
 PKG=${ROOT}/pkg/
